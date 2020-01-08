@@ -1,4 +1,4 @@
-import argparse, time, re, asyncio, functools, base64, random, urllib.parse, socket
+import argparse, time, re, asyncio, functools, base64, random, urllib.parse, socket, trackback
 from . import proto
 from .__doc__ import *
 
@@ -108,22 +108,26 @@ async def reuse_stream_handler(reader, writer, unix, lbind, protos, rserver, urs
     async def tcp_handler(reader, writer, host_name, port):
         try:
             if block and block(host_name):
+                traceback.print_exc()
                 raise Exception('BLOCK ' + host_name)
             roption = schedule(rserver, salgorithm, host_name, port) or ProxyURI.DIRECT
             verbose(f'{lproto.name} {remote_text}{roption.logtext(host_name, port)}')
             try:
                 reader_remote, writer_remote = await roption.open_connection(host_name, port, local_addr, lbind)
             except asyncio.TimeoutError:
+                traceback.print_exc()
                 raise Exception(f'Connection timeout {roption.bind}')
             try:
                 reader_remote, writer_remote = await roption.prepare_connection(reader_remote, writer_remote, host_name, port)
             except Exception:
                 writer_remote.close()
+                traceback.print_exc()
                 raise Exception('Unknown remote protocol')
             m = modstat(remote_ip, host_name)
             asyncio.ensure_future(lproto.channel(reader_remote, writer, m(2+roption.direct), m(4+roption.direct)))
             asyncio.ensure_future(lproto.channel(reader, writer_remote, m(roption.direct), roption.connection_change))
         except Exception as ex:
+            traceback.print_exc()
             if not isinstance(ex, asyncio.TimeoutError) and not str(ex).startswith('Connection closed'):
                 verbose(f'{str(ex) or "Unsupported protocol"} from {remote_ip}')
             try: writer.close()
