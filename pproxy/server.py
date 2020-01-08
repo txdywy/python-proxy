@@ -1,4 +1,4 @@
-import argparse, time, re, asyncio, functools, base64, random, urllib.parse, socket, trackback
+import argparse, time, re, asyncio, functools, base64, random, urllib.parse, socket, traceback
 from . import proto
 from .__doc__ import *
 
