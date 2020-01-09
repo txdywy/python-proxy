@@ -1,4 +1,4 @@
-import time, sys, asyncio, functools
+import time, sys, asyncio, functools, traceback
 
 b2s = lambda i: f'{i/2**30:.1f}G' if i>=2**30 else f'{i/2**20:.1f}M' if i>=2**20 else f'{i/1024:.1f}K'
 
@@ -43,6 +43,7 @@ async def realtime_stat(stats):
 
 def setup(loop, args):
     def verbose(s):
+        traceback.print_exc()
         if args.v >= 2:
             sys.stdout.write('\x1b[32m'+time.strftime('%Y-%m-%d %H:%M:%S')+'\x1b[m ')
             sys.stdout.write(s+'\x1b[0K\n')
